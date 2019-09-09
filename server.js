@@ -4,10 +4,9 @@ var app = express();
 var HTTP_PORT = process.env.PORT || 8080;
 
 app.get("/", (req, res) => {
-    res.send("Quoc Viet Nguyen - 107724189");
-
+  res.send("Quoc Viet  - 107724189");
 });
 
 app.listen(HTTP_PORT, () => {
-    console.log("Server is Running...");
+  console.log("Server is Running...");
 });

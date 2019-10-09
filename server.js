@@ -19,10 +19,12 @@ var path = require("path");
 var app = express();
 var multer = require("multer");
 const fs = require("fs");
+var bodyParser = require('body-parser');
 
 var HTTP_PORT = process.env.PORT || 8080;
 
 app.use(express.static("public"));
+app.use(bodyParser.urlencoded({ extended: true }))
 
 // Setup multer for file storage
 const storage = multer.diskStorage({
@@ -44,14 +46,22 @@ app.get("/about", (req, res) => {
 });
 
 app.get("/employees", (req, res) => {
-  dataService
-    .getAllEmployees()
-    .then(data => {
-      res.json(data);
-    })
-    .catch(err => {
-      res.json({ message: err });
-    });
+  if (req.query.status) {
+    dataService.getEmployeesByStatus(req.query.status).then((employees) => {
+      res.json(employees);
+    }).catch(err => res.json({ message: err }));
+  }
+  else {
+    dataService
+      .getAllEmployees()
+      .then(datas => {
+        res.json(datas);
+      })
+      .catch(err => {
+        res.json({ message: err });
+      });
+  }
+
 });
 
 app.get("/departments", (req, res) => {
@@ -96,6 +106,14 @@ app.get("/images", (req, res) => {
 // POST Routes
 app.post("/images/add", upload.single("imageFile"), (req, res) => {
   res.redirect("/images");
+})
+
+app.post("/employees/add", (req, res) => {
+  dataService.addEmployee(req.body).then(() => {
+    res.redirect("/employees");
+  }).catch(() => {
+    console.log("Error");
+  })
 })
 
 // Middleware

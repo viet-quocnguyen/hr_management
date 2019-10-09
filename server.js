@@ -12,17 +12,29 @@
  *
  ********************************************************************************/
 
-var employeesData = require("./data/employees.json");
-var departmentsData = require("./data/departments.json");
+// Configuration
 var dataService = require("./data-service.js");
 var express = require("express");
 var path = require("path");
 var app = express();
+var multer = require("multer");
+const fs = require("fs");
 
 var HTTP_PORT = process.env.PORT || 8080;
 
 app.use(express.static("public"));
 
+// Setup multer for file storage
+const storage = multer.diskStorage({
+  destination: "./public/images/uploaded",
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + path.extname(file.originalname));
+  }
+})
+
+var upload = multer({ storage: storage });
+
+// GET Routes
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "/views/home.html"));
 });
@@ -64,10 +76,34 @@ app.get("/managers", (req, res) => {
     });
 });
 
+app.get("/employees/add", (req, res) => {
+  res.sendFile(path.join(__dirname, "/views/addEmployee.html"));
+
+})
+
+app.get("/images/add", (req, res) => {
+  res.sendFile(path.join(__dirname, "/views/addImage.html"));
+})
+
+app.get("/images", (req, res) => {
+  fs.readdir(path.join(__dirname, "/public/images/uploaded"), function (err, items) {
+    res.json({
+      images: items
+    })
+  });
+})
+
+// POST Routes
+app.post("/images/add", upload.single("imageFile"), (req, res) => {
+  res.redirect("/images");
+})
+
+// Middleware
 app.use((req, res) => {
   res.status(404).send("Page not found");
 });
 
+// Fetch JSON data and listen to the port
 dataService
   .initialize()
   .then(res => {

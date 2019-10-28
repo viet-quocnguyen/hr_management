@@ -20,11 +20,41 @@ var app = express();
 var multer = require("multer");
 const fs = require("fs");
 var bodyParser = require("body-parser");
+var exphbs = require("express-handlebars");
 
 var HTTP_PORT = process.env.PORT || 8080;
 
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.engine(
+  ".hbs",
+  exphbs({
+    extname: ".hbs",
+    defaultLayout: "main",
+    helpers: {
+      navLink: function(url, options) {
+        return (
+          `<li class=${url == app.locals.activeRoute ? "active" : ""}>` +
+          `<a href="${url}">${options.fn(this)}</a>` +
+          `</li>`
+        );
+      },
+      equal: function(lvalue, rvalue, options) {
+        if (arguments.length < 3) {
+          throw new Error("Handlebars Helper equal needs 2 parameters");
+        }
+        if (lvalue != rvalue) {
+          return options.inverse(this);
+        } else {
+          return options.fn(this);
+        }
+      }
+    }
+  })
+);
+
+app.set("view engine", ".hbs");
 
 // Setup multer for file storage
 const storage = multer.diskStorage({
@@ -36,13 +66,20 @@ const storage = multer.diskStorage({
 
 var upload = multer({ storage: storage });
 
+app.use((req, res, next) => {
+  let route = req.baseUrl + req.path;
+
+  app.locals.activeRoute = route == "/" ? "/" : route.replace(/\/$/, "");
+  next();
+});
+
 // GET Routes
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/home.html"));
+  res.render("home");
 });
 
 app.get("/about", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/about.html"));
+  res.render("about");
 });
 
 app.get("/employees", (req, res) => {
@@ -101,23 +138,12 @@ app.get("/departments", (req, res) => {
     });
 });
 
-app.get("/managers", (req, res) => {
-  dataService
-    .getManagers()
-    .then(data => {
-      res.json(data);
-    })
-    .catch(err => {
-      res.json({ message: err });
-    });
-});
-
 app.get("/employees/add", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/addEmployee.html"));
+  res.render("addEmployee");
 });
 
 app.get("/images/add", (req, res) => {
-  res.sendFile(path.join(__dirname, "/views/addImage.html"));
+  res.render("addImage");
 });
 
 app.get("/images", (req, res) => {
@@ -125,7 +151,7 @@ app.get("/images", (req, res) => {
     err,
     items
   ) {
-    res.json({
+    res.render("images", {
       images: items
     });
   });

@@ -23,6 +23,7 @@ module.exports.getAllEmployees = function() {
     if (employees.length === 0) {
       reject("No results returned");
     }
+
     resolve(employees);
   });
 };
@@ -106,5 +107,16 @@ module.exports.addEmployee = function(employeeData) {
     employeeData.employeeNum = employees.length + 1;
     employees.push(employeeData);
     resolve(employees);
+  });
+};
+
+module.exports.updateEmployee = function(employeeData) {
+  return new Promise((resolve, reject) => {
+    employees.forEach((employee, index) => {
+      if (employee.employeeNum == employeeData.employeeNum) {
+        employees[index] = employeeData;
+        return resolve();
+      }
+    });
   });
 };

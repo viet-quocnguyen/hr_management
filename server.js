@@ -1,12 +1,12 @@
 /*********************************************************************************
- * WEB322 – Assignment 03
+ * WEB322 – Assignment 04
  * I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part
  * of this assignment has been copied manually or electronically from any other source
  * (including 3rd party web sites) or distributed to other students.
  *
  * Name: Quoc Viet Nguyen
  * Student ID: 107724189
- * Date: October 10th, 2019
+ * Date: November 1st, 2019
  *
  * Online (Heroku) Link: https://web322-qvnguyen.herokuapp.com/
  *
@@ -87,31 +87,31 @@ app.get("/employees", (req, res) => {
     dataService
       .getEmployeesByStatus(req.query.status)
       .then(employees => {
-        res.json(employees);
+        res.render("employees", { employees });
       })
-      .catch(err => res.json({ message: err }));
+      .catch(err => res.render({ message: err }));
   } else if (req.query.department) {
     dataService
       .getEmployeesByDepartment(req.query.department)
       .then(employees => {
-        res.json(employees);
+        res.render("employees", { employees });
       })
-      .catch(err => res.json({ message: err }));
+      .catch(err => res.render("employees", { message: err }));
   } else if (req.query.manager) {
     dataService
       .getEmployeesByManager(req.query.manager)
       .then(employees => {
-        res.json(employees);
+        res.render("employees", { employees });
       })
-      .catch(err => res.json({ message: err }));
+      .catch(err => res.render("employees", { message: err }));
   } else {
     dataService
       .getAllEmployees()
-      .then(datas => {
-        res.json(datas);
+      .then(employees => {
+        res.render("employees", { employees });
       })
       .catch(err => {
-        res.json({ message: err });
+        res.render("employees", { message: err });
       });
   }
 });
@@ -120,18 +120,18 @@ app.get("/employee/:value", (req, res) => {
   dataService
     .getEmployeeByNum(req.params.value)
     .then(employee => {
-      res.json(employee);
+      res.render("employee", { employee });
     })
     .catch(err => {
-      res.json({ message: err });
+      res.json("employee", { message: err });
     });
 });
 
 app.get("/departments", (req, res) => {
   dataService
     .getDepartments()
-    .then(data => {
-      res.json(data);
+    .then(departments => {
+      res.render("departments", { departments });
     })
     .catch(err => {
       res.json({ message: err });
@@ -171,6 +171,12 @@ app.post("/employees/add", (req, res) => {
     .catch(() => {
       console.log("Error");
     });
+});
+
+app.post("/employee/update", (req, res) => {
+  dataService.updateEmployee(req.body).then(() => {
+    res.redirect("/employees");
+  });
 });
 
 // Middleware

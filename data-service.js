@@ -161,3 +161,59 @@ module.exports.updateEmployee = function(employeeData) {
       .catch(() => reject("unable to update employee"));
   });
 };
+
+module.exports.addDepartment = function(departmentData){
+  for (let prop in departmentData) {
+    if (departmentData[prop] === "") {
+      departmentData[prop] = null;
+    }
+  }
+
+  return new Promise((resolve, reject) => {
+    Department.create(departmentData).then(() => resolve()).catch(() => reject("unable to create department"));
+  });
+}
+
+module.exports.updateDepartment = function(departmentData) {
+  
+  for (let prop in departmentData) {
+    if (departmentData[prop] === "") {
+      departmentData[prop] = null;
+    }
+  }
+  return new Promise((resolve, reject) => {
+    Department.update(
+      {
+        ...departmentData
+      },
+      {
+        where: {
+          departmentId: departmentData.departmentId
+        }
+      }
+    )
+      .then(() => resolve())
+      .catch(() => reject("unable to update employee"));
+  });
+};
+
+module.exports.getDepartmentById = function(id){
+  return new Promise((resolve, reject) => {
+    Department.findAll( {
+      where: {
+        departmentId: id
+      }
+    }).then((data) => resolve(data[0])).catch(() => reject("no results returned"));
+  })
+}
+
+module.exports.deleteDepartmentById = function(id){
+  return new Promise((resolve, reject) => {
+    Department.destroy({
+      where: {
+        departmentId: id
+      }
+    }).then(() => resolve())
+    .catch(() => reject("unable to delete department"));
+  })
+}

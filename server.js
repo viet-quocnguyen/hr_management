@@ -187,10 +187,43 @@ app.post("/employee/update", (req, res) => {
   });
 });
 
+app.get("/departments/add", (req, res) => {
+  res.render("addDepartment");
+})
+
+app.post("/departments/add", (req, res) => {
+  dataService.addDepartment(req.body).then(() => res.redirect("/departments")).catch(() => console.log("Error"));
+})
+
+app.post("/department/update", (req, res) => {
+  dataService.updateDepartment(req.body).then(() => res.redirect("/departments")).catch(() => console.log("Error"));
+})
+
+app.get("/department/:departmentId", (req, res) => {
+  dataService.getDepartmentById(req.params.departmentId).then((data) => {
+    if(data){
+      res.render("department", data);
+    }else{
+      res.status(404).send("Department Not Found");
+    }
+  }).catch(() => {
+    res.status(404).send("Department Not Found");
+  })
+})
+
+app.get("/departments/delete/:departmentId", (req, res) => {
+  dataService.deleteDepartmentById(req.params.departmentId).then(() => {
+    res.redirect("departments");
+  }).catch(() => {
+    res.status(500).send("Unable to remove department");
+  })
+})
+
 // Middleware
 app.use((req, res) => {
   res.status(404).send("Page not found");
 });
+
 
 // Fetch JSON data and listen to the port
 dataService

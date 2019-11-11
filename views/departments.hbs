@@ -2,6 +2,11 @@
   <div class="col-md-12">
     <h2>Departments</h2>
     <hr />
+    {{#unless departments}}
+    <div class="col-md-12 text-center">
+      <strong>{{message}}</strong>
+    </div>
+    {{else}}
     <div class="table-responsive">
       <table class="table">
         <thead>
@@ -11,14 +16,17 @@
           </tr>
         </thead>
         <tbody>
+
           {{#each departments}}
           <tr>
             <td><a href="/employees?department={{departmentId}}">{{departmentId}}</a></td>
             <td><a href="/employees?department={{departmentId}}">{{departmentName}}</a></td>
           </tr>
           {{/each}}
+
         </tbody>
       </table>
     </div>
+    {{/unless}}
   </div>
 </div>

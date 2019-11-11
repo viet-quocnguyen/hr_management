@@ -108,7 +108,11 @@ app.get("/employees", (req, res) => {
     dataService
       .getAllEmployees()
       .then(employees => {
-        res.render("employees", { employees });
+        if (employees.length > 0) {
+          res.render("employees", { employees });
+        } else {
+          res.render("employees", { message: "No results" });
+        }
       })
       .catch(err => {
         res.render("employees", { message: err });
@@ -131,7 +135,11 @@ app.get("/departments", (req, res) => {
   dataService
     .getDepartments()
     .then(departments => {
-      res.render("departments", { departments });
+      if (departments.length > 0) {
+        res.render("departments", { departments });
+      } else {
+        res.render("departments", { message: "No results" });
+      }
     })
     .catch(err => {
       res.json({ message: err });

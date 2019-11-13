@@ -121,10 +121,13 @@ app.get("/employees", (req, res) => {
 });
 
 app.get("/employee/:value", (req, res) => {
+  
   dataService
     .getEmployeeByNum(req.params.value)
     .then(employee => {
+      console.log(employee);
       res.render("employee", { employee });
+     
     })
     .catch(err => {
       res.json("employee", { message: err });
@@ -171,6 +174,7 @@ app.post("/images/add", upload.single("imageFile"), (req, res) => {
 });
 
 app.post("/employees/add", (req, res) => {
+  
   dataService
     .addEmployee(req.body)
     .then(() => {
@@ -196,13 +200,16 @@ app.post("/departments/add", (req, res) => {
 })
 
 app.post("/department/update", (req, res) => {
+  console.log(req.body);
   dataService.updateDepartment(req.body).then(() => res.redirect("/departments")).catch(() => console.log("Error"));
 })
 
 app.get("/department/:departmentId", (req, res) => {
-  dataService.getDepartmentById(req.params.departmentId).then((data) => {
-    if(data){
-      res.render("department", data);
+  
+  dataService.getDepartmentById(req.params.departmentId).then((department) => {
+    console.log(department)
+    if(department){
+      res.render("department", {department});
     }else{
       res.status(404).send("Department Not Found");
     }

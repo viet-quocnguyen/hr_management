@@ -182,10 +182,9 @@ module.exports.updateDepartment = function(departmentData) {
     }
   }
   return new Promise((resolve, reject) => {
+    
     Department.update(
-      {
-        ...departmentData
-      },
+      departmentData,
       {
         where: {
           departmentId: departmentData.departmentId

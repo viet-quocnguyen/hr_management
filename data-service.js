@@ -107,12 +107,12 @@ module.exports.getEmployeesByManager = function(manager) {
 
 module.exports.getEmployeeByNum = function(num) {
   return new Promise((resolve, reject) => {
-    Employee.findAll({
+    Employee.findOne({
       where: {
         employeeNum: num
       }
     })
-      .then(data => resolve(data))
+      .then(employee => resolve(employee))
       .catch(() => reject("no results returned"));
   });
 };
@@ -162,7 +162,7 @@ module.exports.updateEmployee = function(employeeData) {
   });
 };
 
-module.exports.addDepartment = function(departmentData){
+module.exports.addDepartment = function(departmentData) {
   for (let prop in departmentData) {
     if (departmentData[prop] === "") {
       departmentData[prop] = null;
@@ -170,49 +170,49 @@ module.exports.addDepartment = function(departmentData){
   }
 
   return new Promise((resolve, reject) => {
-    Department.create(departmentData).then(() => resolve()).catch(() => reject("unable to create department"));
+    Department.create(departmentData)
+      .then(() => resolve())
+      .catch(() => reject("unable to create department"));
   });
-}
+};
 
 module.exports.updateDepartment = function(departmentData) {
-  
   for (let prop in departmentData) {
     if (departmentData[prop] === "") {
       departmentData[prop] = null;
     }
   }
   return new Promise((resolve, reject) => {
-    
-    Department.update(
-      departmentData,
-      {
-        where: {
-          departmentId: departmentData.departmentId
-        }
+    Department.update(departmentData, {
+      where: {
+        departmentId: departmentData.departmentId
       }
-    )
+    })
       .then(() => resolve())
       .catch(() => reject("unable to update employee"));
   });
 };
 
-module.exports.getDepartmentById = function(id){
+module.exports.getDepartmentById = function(id) {
   return new Promise((resolve, reject) => {
-    Department.findAll( {
+    Department.findAll({
       where: {
         departmentId: id
       }
-    }).then((data) => resolve(data[0])).catch(() => reject("no results returned"));
-  })
-}
+    })
+      .then(data => resolve(data[0]))
+      .catch(() => reject("no results returned"));
+  });
+};
 
-module.exports.deleteDepartmentById = function(id){
+module.exports.deleteDepartmentById = function(id) {
   return new Promise((resolve, reject) => {
     Department.destroy({
       where: {
         departmentId: id
       }
-    }).then(() => resolve())
-    .catch(() => reject("unable to delete department"));
-  })
-}
+    })
+      .then(() => resolve())
+      .catch(() => reject("unable to delete department"));
+  });
+};

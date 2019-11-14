@@ -73,7 +73,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// GET Routes
+// GET ROUTES
 app.get("/", (req, res) => {
   res.render("home");
 });
@@ -82,6 +82,9 @@ app.get("/about", (req, res) => {
   res.render("about");
 });
 
+/**
+ * Employees Routes
+ */
 app.get("/employees", (req, res) => {
   if (req.query.status) {
     dataService
@@ -120,20 +123,58 @@ app.get("/employees", (req, res) => {
   }
 });
 
-app.get("/employee/:value", (req, res) => {
-  
+app.get("/employee/:empNum", (req, res) => {
+  let viewData = {};
   dataService
-    .getEmployeeByNum(req.params.value)
-    .then(employee => {
-      console.log(employee);
-      res.render("employee", { employee });
-     
+    .getEmployeeByNum(req.params.empNum)
+    .then(data => {
+      if (data) {
+        viewData.employee = data;
+      } else {
+        viewData.employee = null;
+      }
     })
-    .catch(err => {
-      res.json("employee", { message: err });
+    .catch(() => {
+      viewData.employee = null;
+    })
+    .then(dataService.getDepartments)
+    .then(data => {
+      viewData.departments = data;
+
+      for (let i = 0; i < viewData.departments.length; i++) {
+        if (
+          viewData.departments[i].departmentId == viewData.employee.department
+        ) {
+          viewData.departments[i].selected = true;
+        }
+      }
+    })
+    .catch(() => {
+      viewData.departments = [];
+    })
+    .then(() => {
+      if (viewData.employee == null) {
+        res.status(404).send("Employee Not Found");
+      } else {
+        res.render("employee", { viewData: viewData });
+      }
     });
 });
 
+app.get("/employees/add", (req, res) => {
+  dataService
+    .getDepartments()
+    .then(departments => {
+      res.render("addEmployee", { departments });
+    })
+    .catch(() => {
+      res.render("addEmployee", { departments: [] });
+    });
+});
+
+/**
+ * Departments Routes
+ */
 app.get("/departments", (req, res) => {
   dataService
     .getDepartments()
@@ -149,10 +190,37 @@ app.get("/departments", (req, res) => {
     });
 });
 
-app.get("/employees/add", (req, res) => {
-  res.render("addEmployee");
+app.get("/department/:departmentId", (req, res) => {
+  dataService
+    .getDepartmentById(req.params.departmentId)
+    .then(department => {
+      console.log(department);
+      if (department) {
+        console.log(department.departmentId);
+        res.render("department", { department });
+      } else {
+        res.status(404).send("Department Not Found");
+      }
+    })
+    .catch(() => {
+      res.status(404).send("Department Not Found");
+    });
 });
 
+app.get("/departments/delete/:departmentId", (req, res) => {
+  dataService
+    .deleteDepartmentById(req.params.departmentId)
+    .then(() => {
+      res.redirect("/departments");
+    })
+    .catch(() => {
+      res.status(500).send("Unable to remove department");
+    });
+});
+
+/**
+ * Images Routes
+ */
 app.get("/images/add", (req, res) => {
   res.render("addImage");
 });
@@ -168,13 +236,12 @@ app.get("/images", (req, res) => {
   });
 });
 
-// POST Routes
+// POST ROUTES
 app.post("/images/add", upload.single("imageFile"), (req, res) => {
   res.redirect("/images");
 });
 
 app.post("/employees/add", (req, res) => {
-  
   dataService
     .addEmployee(req.body)
     .then(() => {
@@ -193,44 +260,26 @@ app.post("/employee/update", (req, res) => {
 
 app.get("/departments/add", (req, res) => {
   res.render("addDepartment");
-})
+});
 
 app.post("/departments/add", (req, res) => {
-  dataService.addDepartment(req.body).then(() => res.redirect("/departments")).catch(() => console.log("Error"));
-})
+  dataService
+    .addDepartment(req.body)
+    .then(() => res.redirect("/departments"))
+    .catch(() => console.log("Error"));
+});
 
 app.post("/department/update", (req, res) => {
-  console.log(req.body);
-  dataService.updateDepartment(req.body).then(() => res.redirect("/departments")).catch(() => console.log("Error"));
-})
-
-app.get("/department/:departmentId", (req, res) => {
-  
-  dataService.getDepartmentById(req.params.departmentId).then((department) => {
-    console.log(department)
-    if(department){
-      res.render("department", {department});
-    }else{
-      res.status(404).send("Department Not Found");
-    }
-  }).catch(() => {
-    res.status(404).send("Department Not Found");
-  })
-})
-
-app.get("/departments/delete/:departmentId", (req, res) => {
-  dataService.deleteDepartmentById(req.params.departmentId).then(() => {
-    res.redirect("departments");
-  }).catch(() => {
-    res.status(500).send("Unable to remove department");
-  })
-})
+  dataService
+    .updateDepartment(req.body)
+    .then(() => res.redirect("/departments"))
+    .catch(() => console.log("Error"));
+});
 
 // Middleware
 app.use((req, res) => {
   res.status(404).send("Page not found");
 });
-
 
 // Fetch JSON data and listen to the port
 dataService

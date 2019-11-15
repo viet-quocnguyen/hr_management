@@ -162,6 +162,18 @@ module.exports.updateEmployee = function(employeeData) {
   });
 };
 
+module.exports.deleteEmployeeByNum = function(empNum) {
+  return new Promise((resolve, reject) => {
+    Employee.destroy({
+      where: {
+        employeeNum: empNum
+      }
+    })
+      .then(() => resolve())
+      .catch(() => reject("unable to delete employee"));
+  });
+};
+
 module.exports.addDepartment = function(departmentData) {
   for (let prop in departmentData) {
     if (departmentData[prop] === "") {

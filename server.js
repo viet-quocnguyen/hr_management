@@ -90,32 +90,36 @@ app.get("/employees", (req, res) => {
     dataService
       .getEmployeesByStatus(req.query.status)
       .then(employees => {
-        res.render("employees", { employees });
+        employees.length > 0
+          ? res.render("employees", { employees })
+          : res.render("employees", { message: "no results" });
       })
       .catch(err => res.render({ message: err }));
   } else if (req.query.department) {
     dataService
       .getEmployeesByDepartment(req.query.department)
       .then(employees => {
-        res.render("employees", { employees });
+        employees.length > 0
+          ? res.render("employees", { employees })
+          : res.render("employees", { message: "no results" });
       })
       .catch(err => res.render("employees", { message: err }));
   } else if (req.query.manager) {
     dataService
       .getEmployeesByManager(req.query.manager)
       .then(employees => {
-        res.render("employees", { employees });
+        employees.length > 0
+          ? res.render("employees", { employees })
+          : res.render("employees", { message: "no results" });
       })
       .catch(err => res.render("employees", { message: err }));
   } else {
     dataService
       .getAllEmployees()
       .then(employees => {
-        if (employees.length > 0) {
-          res.render("employees", { employees });
-        } else {
-          res.render("employees", { message: "No results" });
-        }
+        employees.length > 0
+          ? res.render("employees", { employees })
+          : res.render("employees", { message: "no results" });
       })
       .catch(err => {
         res.render("employees", { message: err });
@@ -172,6 +176,17 @@ app.get("/employees/add", (req, res) => {
     });
 });
 
+app.get("/employees/delete/:empNum", (req, res) => {
+  dataService
+    .deleteEmployeeByNum(req.params.empNum)
+    .then(() => {
+      res.redirect("/employees");
+    })
+    .catch(() => {
+      res.status(500).send("Unable to Remove Employee / Employee not found");
+    });
+});
+
 /**
  * Departments Routes
  */
@@ -186,7 +201,7 @@ app.get("/departments", (req, res) => {
       }
     })
     .catch(err => {
-      res.json({ message: err });
+      res.status(500).send("Unable to get /departments");
     });
 });
 
@@ -196,14 +211,13 @@ app.get("/department/:departmentId", (req, res) => {
     .then(department => {
       console.log(department);
       if (department) {
-        console.log(department.departmentId);
         res.render("department", { department });
       } else {
         res.status(404).send("Department Not Found");
       }
     })
     .catch(() => {
-      res.status(404).send("Department Not Found");
+      res.status(500).send("Unable to get department");
     });
 });
 
@@ -216,6 +230,10 @@ app.get("/departments/delete/:departmentId", (req, res) => {
     .catch(() => {
       res.status(500).send("Unable to remove department");
     });
+});
+
+app.get("/departments/add", (req, res) => {
+  res.render("addDepartment");
 });
 
 /**
@@ -247,8 +265,8 @@ app.post("/employees/add", (req, res) => {
     .then(() => {
       res.redirect("/employees");
     })
-    .catch(() => {
-      console.log("Error");
+    .catch(err => {
+      res.status(500).send("Unable to add employee");
     });
 });
 
@@ -258,22 +276,22 @@ app.post("/employee/update", (req, res) => {
   });
 });
 
-app.get("/departments/add", (req, res) => {
-  res.render("addDepartment");
-});
-
 app.post("/departments/add", (req, res) => {
   dataService
     .addDepartment(req.body)
     .then(() => res.redirect("/departments"))
-    .catch(() => console.log("Error"));
+    .catch(err => {
+      res.status(500).send("Unable to add department");
+    });
 });
 
 app.post("/department/update", (req, res) => {
   dataService
     .updateDepartment(req.body)
     .then(() => res.redirect("/departments"))
-    .catch(() => console.log("Error"));
+    .catch(err => {
+      res.status(500).send("Unable to Update department");
+    });
 });
 
 // Middleware

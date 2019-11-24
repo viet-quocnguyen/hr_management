@@ -1,12 +1,12 @@
 /*********************************************************************************
- * WEB322 – Assignment 04
+ * WEB322 – Assignment 06
  * I declare that this assignment is my own work in accordance with Seneca Academic Policy. No part
  * of this assignment has been copied manually or electronically from any other source
  * (including 3rd party web sites) or distributed to other students.
  *
  * Name: Quoc Viet Nguyen
  * Student ID: 107724189
- * Date: November 1st, 2019
+ * Date: November 24th, 2019
  *
  * Online (Heroku) Link: https://web322-qvnguyen.herokuapp.com/
  *

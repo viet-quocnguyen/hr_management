@@ -26,27 +26,6 @@ var clientSessions = require("client-sessions");
 
 var HTTP_PORT = process.env.PORT || 8080;
 
-app.use(
-  clientSessions({
-    cookieName: "sessions",
-    secret: "viet123456",
-    duration: 2 * 60 * 1000,
-    activeDuration: 1000 * 60
-  })
-);
-
-app.use(function(req, res, next) {
-  res.locals.session = req.session;
-  next();
-});
-
-function isLoggedIn(req, res, next) {
-  if (!req.session.user) {
-    return res.redirect("/login");
-  }
-  next();
-}
-
 app.use(express.static("public"));
 app.use(bodyParser.urlencoded({ extended: true }));
 
@@ -78,6 +57,28 @@ app.engine(
 );
 
 app.set("view engine", ".hbs");
+
+app.use(
+  clientSessions({
+    cookieName: "session",
+    secret: "viet123456",
+    duration: 2 * 60 * 1000,
+    activeDuration: 1000 * 60
+  })
+);
+
+app.use(function(req, res, next) {
+  res.locals.session = req.session;
+  next();
+});
+
+function isLoggedIn(req, res, next) {
+  if (!req.session.user) {
+    return res.redirect("/login");
+  } else {
+    next();
+  }
+}
 
 // Setup multer for file storage
 const storage = multer.diskStorage({
@@ -314,6 +315,56 @@ app.post("/department/update", isLoggedIn, (req, res) => {
     .catch(err => {
       res.status(500).send("Unable to Update department");
     });
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
+app.post("/register", (req, res) => {
+  dataServiceAuth
+    .registerUser(req.body)
+    .then(() => res.render("register", { successMessage: "User created" }))
+    .catch(err => {
+      res.render("register", {
+        errorMessage: err,
+        userName: req.body.userName
+      });
+    });
+});
+
+app.post("/login", (req, res) => {
+  req.body.userAgent = req.get("User-Agent");
+
+  dataServiceAuth
+    .checkUser(req.body)
+    .then(user => {
+      req.session.user = {
+        userName: user.userName,
+        email: user.email,
+        loginHistory: user.loginHistory
+      };
+      res.redirect("/employees");
+    })
+    .catch(err => {
+      res.render("login", {
+        errorMessage: err,
+        userName: req.body.userName
+      });
+    });
+});
+
+app.get("/logout", (req, res) => {
+  req.session.reset();
+  res.redirect("/");
+});
+
+app.get("/userHistory", isLoggedIn, (req, res) => {
+  res.render("userHistory");
 });
 
 // Middleware
